@@ -1,0 +1,46 @@
+module RAM_tb;
+
+    reg clk;
+    reg we;
+    reg [3:0] addr;
+    reg [7:0] din;
+    wire [7:0] dout;
+
+    // Instantiate the RAM module
+    RAM uut (
+        .clk(clk),
+        .we(we),
+        .addr(addr),
+        .din(din),
+        .dout(dout)
+    );
+
+    // Clock generation
+    initial begin
+        clk = 0;
+        forever #5 clk = ~clk;  // 10ns period
+    end
+
+    initial begin
+        // Initialize inputs
+        we = 0; addr = 4'b0000; din = 8'b00000000; #10;
+
+        // Write operations
+        we = 1; addr = 4'b0000; din = 8'b10101010; #10;  // Write 0xAA to address 0x0
+        we = 1; addr = 4'b0001; din = 8'b01010101; #10;  // Write 0x55 to address 0x1
+
+        // Read operations
+        we = 0; addr = 4'b0000; #10;  // Read from address 0x0
+        we = 0; addr = 4'b0001; #10;  // Read from address 0x1
+        we = 0; addr = 4'b0010; #10;  // Read from address 0x2 (unwritten)
+
+        // Add more test cases if necessary
+        $finish;
+    end
+
+    // Monitor process
+    initial begin
+        $monitor("Time=%0t, Addr=%b, WE=%b, Din=%b, Dout=%b", $time, addr, we, din, dout);
+    end
+
+endmodule
